@@ -124,9 +124,6 @@ extern crate libc;
 extern crate miow;
 
 #[cfg(windows)]
-extern crate winapi;
-
-#[cfg(windows)]
 extern crate windows_sys;
 
 #[macro_use]

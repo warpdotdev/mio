@@ -9,13 +9,13 @@ use std::time::Duration;
 
 use lazycell::AtomicLazyCell;
 
-use winapi::shared::winerror;
 use miow;
 use miow::iocp::{CompletionPort, CompletionStatus};
 
 use event_imp::{Event, Evented, Ready};
 use poll::{self, Poll};
 use sys::windows::buffer_pool::BufferPool;
+use windows_sys::Win32::Foundation::WAIT_TIMEOUT;
 use windows_sys::Win32::System::IO::{OVERLAPPED, OVERLAPPED_ENTRY};
 use {Token, PollOpt};
 
@@ -79,7 +79,7 @@ impl Selector {
         trace!("polling IOCP");
         let n = match self.inner.port.get_many(&mut events.statuses, timeout) {
             Ok(statuses) => statuses.len(),
-            Err(ref e) if e.raw_os_error() == Some(winerror::WAIT_TIMEOUT as i32) => 0,
+            Err(ref e) if e.raw_os_error() == Some(WAIT_TIMEOUT as i32) => 0,
             Err(e) => return Err(e),
         };
 

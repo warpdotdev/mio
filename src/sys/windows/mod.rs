@@ -139,7 +139,6 @@
 use std::io;
 use std::os::windows::prelude::*;
 
-use winapi::um::winbase::{FILE_SKIP_COMPLETION_PORT_ON_SUCCESS, FILE_SKIP_SET_EVENT_ON_HANDLE};
 use windows_sys::Win32::Foundation::{FALSE, HANDLE, TRUE};
 use windows_sys::Win32::Storage::FileSystem::SetFileCompletionNotificationModes;
 use windows_sys::Win32::System::IO::CancelIoEx;
@@ -174,6 +173,9 @@ unsafe fn cancel(socket: &AsRawSocket,
 }
 
 unsafe fn no_notify_on_instant_completion(handle: HANDLE) -> io::Result<()> {
+    const FILE_SKIP_COMPLETION_PORT_ON_SUCCESS: u8 = 1;
+    const FILE_SKIP_SET_EVENT_ON_HANDLE: u8 = 2;
+
     let flags = FILE_SKIP_COMPLETION_PORT_ON_SUCCESS | FILE_SKIP_SET_EVENT_ON_HANDLE;
 
     let r = SetFileCompletionNotificationModes(handle, flags);
