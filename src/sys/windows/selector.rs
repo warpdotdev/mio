@@ -9,13 +9,14 @@ use std::time::Duration;
 
 use lazycell::AtomicLazyCell;
 
-use winapi::*;
+use winapi::shared::winerror;
 use miow;
 use miow::iocp::{CompletionPort, CompletionStatus};
 
 use event_imp::{Event, Evented, Ready};
 use poll::{self, Poll};
 use sys::windows::buffer_pool::BufferPool;
+use windows_sys::Win32::System::IO::{OVERLAPPED, OVERLAPPED_ENTRY};
 use {Token, PollOpt};
 
 /// Each Selector has a globally unique(ish) ID associated with it. This ID
@@ -78,7 +79,7 @@ impl Selector {
         trace!("polling IOCP");
         let n = match self.inner.port.get_many(&mut events.statuses, timeout) {
             Ok(statuses) => statuses.len(),
-            Err(ref e) if e.raw_os_error() == Some(WAIT_TIMEOUT as i32) => 0,
+            Err(ref e) if e.raw_os_error() == Some(winerror::WAIT_TIMEOUT as i32) => 0,
             Err(e) => return Err(e),
         };
 
@@ -461,16 +462,10 @@ impl Events {
 
 macro_rules! overlapped2arc {
     ($e:expr, $t:ty, $($field:ident).+) => ({
-        let offset = offset_of!($t, $($field).+);
+        let offset = mem::offset_of!($t, $($field).+);
         debug_assert!(offset < mem::size_of::<$t>());
         FromRawArc::from_raw(($e as usize - offset) as *mut $t)
     })
-}
-
-macro_rules! offset_of {
-    ($t:ty, $($field:ident).+) => (
-        &(*(0 as *const $t)).$($field).+ as *const _ as usize
-    )
 }
 
 // See sys::windows module docs for why this exists.

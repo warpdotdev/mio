@@ -12,10 +12,11 @@ use std::sync::{Mutex, MutexGuard};
 
 #[allow(unused_imports)]
 use net2::{UdpBuilder, UdpSocketExt};
-use winapi::*;
 use miow::iocp::CompletionStatus;
 use miow::net::SocketAddrBuf;
 use miow::net::UdpSocketExt as MiowUdpSocketExt;
+use windows_sys::Win32::Networking::WinSock::WSAEMSGSIZE;
+use windows_sys::Win32::System::IO::OVERLAPPED_ENTRY;
 
 use {poll, Ready, Poll, PollOpt, Token};
 use event::Evented;
@@ -160,7 +161,7 @@ impl UdpSocket {
                 // then don't actually read any data, just return an error.
                 if buf.len() < data.len() {
                     me.read = State::Ready(data);
-                    Err(io::Error::from_raw_os_error(WSAEMSGSIZE as i32))
+                    Err(io::Error::from_raw_os_error(WSAEMSGSIZE))
                 } else {
                     let r = if let Some(addr) = me.read_buf.to_socket_addr() {
                         buf.write(&data).unwrap();

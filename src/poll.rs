@@ -1151,7 +1151,7 @@ impl Poll {
     }
 
     #[inline]
-    #[cfg_attr(feature = "cargo-clippy", allow(clippy::if_same_then_else))]
+    #[cfg_attr(clippy, allow(clippy::if_same_then_else))]
     fn poll2(&self, events: &mut Events, mut timeout: Option<Duration>, interruptible: bool) -> io::Result<usize> {
         // Compute the timeout value passed to the system selector. If the
         // readiness queue has pending nodes, we still want to poll the system
