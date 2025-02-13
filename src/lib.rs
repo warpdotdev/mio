@@ -7,7 +7,7 @@
 
 // Many of mio's public methods violate this lint, but they can't be fixed
 // without a breaking change.
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::trivially_copy_pass_by_ref))]
+#![cfg_attr(clippy, allow(clippy::trivially_copy_pass_by_ref))]
 
 //! A fast, low-level IO library for Rust focusing on non-blocking APIs, event
 //! notification, and other useful utilities for building high performance IO
@@ -124,10 +124,7 @@ extern crate libc;
 extern crate miow;
 
 #[cfg(windows)]
-extern crate winapi;
-
-#[cfg(windows)]
-extern crate kernel32;
+extern crate windows_sys;
 
 #[macro_use]
 extern crate log;
@@ -192,9 +189,7 @@ pub mod event {
     pub use super::event_imp::{Event, Evented};
 }
 
-pub use event::{
-    Events,
-};
+pub use event::Events;
 
 #[deprecated(since = "0.6.5", note = "use events:: instead")]
 #[cfg(feature = "with-deprecated")]
@@ -214,9 +209,7 @@ pub use io::deprecated::would_block;
 #[cfg(all(unix, not(target_os = "fuchsia")))]
 pub mod unix {
     //! Unix only extensions
-    pub use sys::{
-        EventedFd,
-    };
+    pub use sys::EventedFd;
     pub use sys::unix::UnixReady;
 }
 
@@ -229,9 +222,7 @@ pub mod fuchsia {
     //! This module depends on the [magenta-sys crate](https://crates.io/crates/magenta-sys)
     //! and so might introduce breaking changes, even on minor releases,
     //! so long as that crate remains unstable.
-    pub use sys::{
-        EventedHandle,
-    };
+    pub use sys::EventedHandle;
     pub use sys::fuchsia::{FuchsiaReady, zx_signals_t};
 }
 
